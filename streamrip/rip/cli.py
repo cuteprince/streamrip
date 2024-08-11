@@ -6,6 +6,7 @@ import shutil
 import subprocess
 from functools import wraps
 from typing import Any
+from aiohttp.resolver import AsyncResolver
 
 import aiofiles
 import aiohttp
@@ -419,7 +420,9 @@ async def id(ctx, source, media_type, id):
 
 
 async def latest_streamrip_version() -> tuple[str, str | None]:
-    async with aiohttp.ClientSession() as s:
+    resolver = AsyncResolver(nameservers=["8.8.8.8", "8.8.4.4"])
+    conn = aiohttp.TCPConnector(resolver=resolver)
+    async with aiohttp.ClientSession(connector=conn) as s:
         async with s.get("https://pypi.org/pypi/streamrip/json") as resp:
             data = await resp.json()
         version = data["info"]["version"]

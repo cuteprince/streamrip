@@ -6,6 +6,7 @@ import random
 import re
 from contextlib import ExitStack
 from dataclasses import dataclass
+from aiohttp.resolver import AsyncResolver
 
 import aiohttp
 from rich.text import Text
@@ -350,7 +351,9 @@ class PendingLastfmPlaylist(Pending):
                 return await resp.text("utf-8")
 
         # Create new session so we're not bound by rate limit
-        async with aiohttp.ClientSession() as session:
+        resolver = AsyncResolver(nameservers=["8.8.8.8", "8.8.4.4"])
+        conn = aiohttp.TCPConnector(resolver=resolver)
+        async with aiohttp.ClientSession(connector=conn) as session:
             page = await fetch(session, playlist_url)
             playlist_title_match = re_playlist_title_match.search(page)
             if playlist_title_match is None:

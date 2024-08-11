@@ -3,6 +3,7 @@
 import contextlib
 import logging
 from abc import ABC, abstractmethod
+from aiohttp.resolver import AsyncResolver
 
 import aiohttp
 import aiolimiter
@@ -50,9 +51,12 @@ class Client(ABC):
 
     @staticmethod
     async def get_session(headers: dict | None = None) -> aiohttp.ClientSession:
+        resolver = AsyncResolver(nameservers=["8.8.8.8", "8.8.4.4"])
+        conn = aiohttp.TCPConnector(resolver=resolver)
         if headers is None:
             headers = {}
         return aiohttp.ClientSession(
             headers={"User-Agent": DEFAULT_USER_AGENT},
             **headers,
+            connector=conn
         )

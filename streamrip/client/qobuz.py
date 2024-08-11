@@ -6,6 +6,7 @@ import re
 import time
 from collections import OrderedDict
 from typing import List, Optional
+from aiohttp.resolver import AsyncResolver
 
 import aiohttp
 
@@ -124,7 +125,9 @@ class QobuzSpoofer:
         return app_id, secrets_list
 
     async def __aenter__(self):
-        self.session = aiohttp.ClientSession()
+        resolver = AsyncResolver(nameservers=["8.8.8.8", "8.8.4.4"])
+        conn = aiohttp.TCPConnector(resolver=resolver)
+        self.session = aiohttp.ClientSession(connector=conn)
         return self
 
     async def __aexit__(self, *_):
